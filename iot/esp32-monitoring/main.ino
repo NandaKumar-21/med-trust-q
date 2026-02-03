@@ -73,6 +73,31 @@ if (accMag > 25.0) {   // simple fall threshold
 } else {
   Serial.println("Motion: NORMAL");
 }
+int riskScore = 0;
+
+// Heart rate abnormal
+if (bpm < 50 || bpm > 120) {
+  riskScore++;
+}
+
+// SpO2 low
+if (spo2 < 94) {
+  riskScore++;
+}
+
+// Fall detected
+if (accMag > 25.0) {
+  riskScore += 2;
+}
+
+// Risk decision
+if (riskScore == 0) {
+  Serial.println("🟢 Risk: NORMAL");
+} else if (riskScore == 1 || riskScore == 2) {
+  Serial.println("🟡 Risk: WARNING");
+} else {
+  Serial.println("🔴 Risk: HIGH – ECG CHECK REQUIRED");
+}
 
 
 delay(20);
