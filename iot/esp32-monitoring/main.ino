@@ -24,25 +24,32 @@ void setup() {
 }
 
 void loop() {
-  long irValue = particleSensor.getIR();
+long irValue = particleSensor.getIR();
+long redValue = particleSensor.getRed();
 
-  if (irValue > 50000) {  // finger detected
-    if (checkForBeat(irValue)) {
-      static uint32_t lastBeat = 0;
-      uint32_t now = millis();
-      uint32_t delta = now - lastBeat;
-      lastBeat = now;
+if (irValue > 50000) {  // finger detected
+  if (checkForBeat(irValue)) {
+    static uint32_t lastBeat = 0;
+    uint32_t now = millis();
+    uint32_t delta = now - lastBeat;
+    lastBeat = now;
 
-      float bpm = 60 / (delta / 1000.0);
-      if (bpm < 200 && bpm > 40) {
-        Serial.print("Heart Rate: ");
-        Serial.print(bpm);
-        Serial.println(" bpm");
-      }
+    float bpm = 60 / (delta / 1000.0);
+
+    // Simple SpO2 estimation (demo-safe)
+    float spo2 = 110 - (25 * (redValue / (float)irValue));
+
+    if (bpm > 40 && bpm < 200) {
+      Serial.print("HR: ");
+      Serial.print(bpm);
+      Serial.print(" bpm | SpO2: ");
+      Serial.print(spo2);
+      Serial.println(" %");
     }
-  } else {
-    Serial.println("No finger detected");
   }
+} else {
+  Serial.println("No finger detected");
+}
 
-  delay(20);
+delay(20);
 }
