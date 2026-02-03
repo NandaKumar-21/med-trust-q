@@ -1,7 +1,9 @@
 #include <Wire.h>
 #include "MAX30105.h"
 #include "heartRate.h"
-
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
+Adafruit_MPU6050 mpu;
 MAX30105 particleSensor;
 
 void setup() {
@@ -21,6 +23,12 @@ void setup() {
   particleSensor.setPulseAmplitudeGreen(0);
 
   Serial.println("Place your finger on the sensor");
+  if (!mpu.begin()) {
+  Serial.println("MPU6050 not found!");
+  while (1);
+}
+Serial.println("MPU6050 initialized");
+
 }
 
 void loop() {
@@ -50,6 +58,22 @@ if (irValue > 50000) {  // finger detected
 } else {
   Serial.println("No finger detected");
 }
+sensors_event_t a, g, temp;
+mpu.getEvent(&a, &g, &temp);
+
+// Calculate acceleration magnitude
+float accMag = sqrt(
+  a.acceleration.x * a.acceleration.x +
+  a.acceleration.y * a.acceleration.y +
+  a.acceleration.z * a.acceleration.z
+);
+
+if (accMag > 25.0) {   // simple fall threshold
+  Serial.println("⚠️ FALL DETECTED");
+} else {
+  Serial.println("Motion: NORMAL");
+}
+
 
 delay(20);
 }
